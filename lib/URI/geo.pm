@@ -154,13 +154,13 @@ Create a new URI::geo. The arguments should be either
 
 =over
 
-=item latitude, longitude and optionally altitude
+=item * latitude, longitude and optionally altitude
 
-=item a reference to an array containing lat, lon, alt
+=item * a reference to an array containing lat, lon, alt
 
-=item a reference to a hash with suitably named keys
+=item * a reference to a hash with suitably named keys
 
-=item a reference to an object with suitably named accessors
+=item * a reference to an object with suitably named accessors
 
 =back
 
