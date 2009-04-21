@@ -85,6 +85,13 @@ my @case = (
     lon  => -2.344214,
     alt  => undef,
   },
+  {
+    name => 'URI::geo object',
+    args => [ new URI::geo( 54.786989, -2.344214, 99 ) ],
+    lat  => 54.786989,
+    lon  => -2.344214,
+    alt  => 99,
+  },
 );
 
 plan tests => @case * 5;

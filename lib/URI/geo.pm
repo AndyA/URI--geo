@@ -63,9 +63,8 @@ From L<http://geouri.org/>:
       croak "Too many arguments" if @_;
 
       if ( UNIVERSAL::can( $pt, 'can' ) ) {
-
-        if ( $pt->can( 'latlong' ) ) {
-          return $pt->latlong;
+        for my $m ( qw( location latlong ) ) {
+          return $pt->$m() if $pt->can($m);
         }
 
         my $can = sub {
