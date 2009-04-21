@@ -142,6 +142,7 @@ sub _path {
   my ( $lat, $lon, $alt ) = $class->_location_of_pointy_thing( @_ );
   croak "Latitude out of range"  if $lat < -90  || $lat > 90;
   croak "Longitude out of range" if $lon < -180 || $lon > 180;
+  $lon = 0 if $lat == -90 || $lon == 90;
   return $class->_format( $lat, $lon, $alt );
 }
 
@@ -187,10 +188,11 @@ sub new {
 sub _init {
   my ( $class, $uri, $scheme ) = @_;
 
-  my ( undef, undef, $path ) = uri_split $uri;
-  $class->_parse( $path );
+  my $self = $class->SUPER::_init( $uri, $scheme );
 
-  $class->SUPER::_init( $uri, $scheme );
+  my $lat = $self->latitude;
+  $self->longitude( 0 ) if $lat == 90 || $lat == -90;
+  return $self;
 }
 
 =head2 C<location>
@@ -247,6 +249,7 @@ sub longitude { shift->_patch( 1, @_ ) }
 sub altitude  { shift->_patch( 2, @_ ) }
 
 1;
+
 __END__
 
 =head1 DEPENDENCIES

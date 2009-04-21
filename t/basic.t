@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use URI;
-use Test::More tests => 15;
+use Test::More tests => 17;
 
 {
   ok my $guri = URI->new( 'geo:54.786989,-2.344214' ), 'created';
@@ -39,6 +39,11 @@ use Test::More tests => 15;
 {
   eval { URI->new( 'geo:1' ) };
   like $@, qr/Badly formed/, 'error ok';
+}
+
+{
+  ok( URI->new( 'geo:55,1' )->eq( URI->new( 'geo:55,1' ) ), 'eq 1' );
+  ok( URI->new( 'geo:90,1' )->eq( URI->new( 'geo:90,2' ) ), 'eq 2' );
 }
 
 # vim:ts=2:sw=2:et:ft=perl
