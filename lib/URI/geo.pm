@@ -160,8 +160,9 @@ represents a geographical location and have URI::geo do the right thing
 we try a number of different accessor names.
 
 If the object has a C<latlong> method (eg L<Geo::Point>) we'll use that.
-Otherwise we look for accessors called C<lat>, C<latitude>, C<lon>,
-C<long>, C<longitude>, C<ele>, C<alt>, C<elevation> or C<altitude>.
+If there's a C<location> method we call that. Otherwise we look for
+accessors called C<lat>, C<latitude>, C<lon>, C<long>, C<longitude>,
+C<ele>, C<alt>, C<elevation> or C<altitude> and use them.
 
 Often if you have an object or hash reference that represents a point
 you can pass it directly to C<new>.
