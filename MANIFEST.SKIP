@@ -25,6 +25,7 @@
 ^TODO$
 \.swp$
 ^\.prove$
+^Session\.vim$
 
 # Misc other stuff
 ^reference/

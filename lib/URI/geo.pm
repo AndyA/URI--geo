@@ -5,7 +5,7 @@ use strict;
 
 =head1 NAME
 
-URI::geo - [One line description of module's purpose here]
+URI::geo - The geo URI scheme.
 
 =head1 VERSION
 
@@ -17,7 +17,7 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-    use URI::geo;
+  use URI::geo;
   
 =head1 DESCRIPTION
 
