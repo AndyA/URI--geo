@@ -64,7 +64,7 @@ From L<http://geouri.org/>:
 
       if ( UNIVERSAL::can( $pt, 'can' ) ) {
         for my $m ( qw( location latlong ) ) {
-          return $pt->$m() if $pt->can($m);
+          return $pt->$m() if $pt->can( $m );
         }
 
         my $can = sub {
@@ -137,6 +137,14 @@ sub _format {
    grep { defined } $lat, $lon, $alt;
 }
 
+sub _path {
+  my $class = shift;
+  my ( $lat, $lon, $alt ) = $class->_location_of_pointy_thing( @_ );
+  croak "Latitude out of range"  if $lat < -90  || $lat > 90;
+  croak "Longitude out of range" if $lon < -180 || $lon > 180;
+  return $class->_format( $lat, $lon, $alt );
+}
+
 =head1 INTERFACE 
 
 =head2 C<< new >>
@@ -172,8 +180,7 @@ you can pass it directly to C<new>.
 sub new {
   my $self  = shift;
   my $class = ref $self || $self;
-  my $uri   = uri_join 'geo', undef,
-   $class->_format( $class->_location_of_pointy_thing( @_ ) );
+  my $uri   = uri_join 'geo', undef, $class->_path( @_ );
   return bless \$uri, $class;
 }
 
@@ -203,10 +210,8 @@ sub location {
 
   my ( $scheme, $auth, $path, $query, $frag ) = uri_split $$self;
 
-  if ( @_ ) {
-    $path = $self->_format( $self->_location_of_pointy_thing( @_ ) );
-    $$self = uri_join 'geo', $auth, $path, $query, $frag;
-  }
+  $$self = uri_join 'geo', $auth, $self->_path( @_ ), $query, $frag
+   if @_;
 
   return $self->_parse( $path );
 }
