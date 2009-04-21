@@ -1,8 +1,9 @@
 Build.PL
 Changes
+lib/URI/geo.pm
 MANIFEST
 README
-lib/URI/geo.pm
 t/00.load.t
+t/manifest.t
 t/pod-coverage.t
 t/pod.t

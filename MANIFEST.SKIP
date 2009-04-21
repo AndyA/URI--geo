@@ -25,3 +25,7 @@
 ^TODO$
 \.swp$
 ^\.prove$
+
+# Misc other stuff
+^reference/
+
