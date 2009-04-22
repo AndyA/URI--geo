@@ -6,4 +6,5 @@ Revision history for URI-geo
 0.02    2009-04-21
         - Make new recognise objects with a location method.
         - Normalise GeoURIs at the poles.
+        - Added test for Geo::Point compatibility.
 

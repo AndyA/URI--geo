@@ -50,76 +50,84 @@ From L<http://geouri.org/>:
 {
   my $num = qr{-?\d{1,3}(?:\.\d+)?};
 
-  sub _location_of_pointy_thing {
-    my $class = shift;
-
-    my @lat = ( 'lat', 'latitude' );
-    my @lon = ( 'lon', 'long', 'longitude' );
-    my @ele = ( 'ele', 'alt', 'elevation', 'altitude' );
-
-    if ( ref $_[0] ) {
-      my $pt = shift;
-
-      croak "Too many arguments" if @_;
-
-      if ( UNIVERSAL::can( $pt, 'can' ) ) {
-        for my $m ( qw( location latlong ) ) {
-          return $pt->$m() if $pt->can( $m );
-        }
-
-        my $can = sub {
-          my ( $pt, @keys ) = @_;
-          for my $key ( @keys ) {
-            return $key if $pt->can( $key );
-          }
-          return;
-        };
-
-        my $latk = $can->( $pt, @lat );
-        my $lonk = $can->( $pt, @lon );
-        my $elek = $can->( $pt, @ele );
-
-        if ( defined $latk && defined $lonk ) {
-          return $pt->$latk(), $pt->$lonk(),
-           defined $elek ? $pt->$elek() : undef;
-        }
-      }
-      elsif ( 'ARRAY' eq ref $pt ) {
-        return $class->_location_of_pointy_thing( @$pt );
-      }
-      elsif ( 'HASH' eq ref $pt ) {
-        my $has = sub {
-          my ( $pt, @keys ) = @_;
-          for my $key ( @keys ) {
-            return $key if exists $pt->{$key};
-          }
-          return;
-        };
-
-        my $latk = $has->( $pt, @lat );
-        my $lonk = $has->( $pt, @lon );
-        my $elek = $has->( $pt, @ele );
-
-        if ( defined $latk && defined $lonk ) {
-          return $pt->{$latk}, $pt->{$lonk},
-           defined $elek ? $pt->{$elek} : undef;
-        }
-      }
-
-      croak "Don't know how to convert point";
-    }
-    else {
-      croak "Need lat, lon or lat, lon, alt"
-       if @_ < 2 || @_ > 3;
-      return my ( $lat, $lon, $alt ) = @_;
-    }
-  }
-
   sub _parse {
     my ( $class, $path ) = @_;
     croak "Badly formed geo uri"
      unless $path =~ /^$num(?:,$num){1,2}$/;
     return my ( $lat, $lon, $alt ) = split /,/, $path;
+  }
+}
+
+=for internal
+
+Try hard to extract location information from something. We handle lat,
+lon, alt as scalars, arrays containing lat, lon, alt, hashes with
+suitably named keys and objects with suitably named methods.
+
+=cut
+
+sub _location_of_pointy_thing {
+  my $class = shift;
+
+  my @lat = ( 'lat', 'latitude' );
+  my @lon = ( 'lon', 'long', 'longitude' );
+  my @ele = ( 'ele', 'alt', 'elevation', 'altitude' );
+
+  if ( ref $_[0] ) {
+    my $pt = shift;
+
+    croak "Too many arguments" if @_;
+
+    if ( UNIVERSAL::can( $pt, 'can' ) ) {
+      for my $m ( qw( location latlong ) ) {
+        return $pt->$m() if $pt->can( $m );
+      }
+
+      my $can = sub {
+        my ( $pt, @keys ) = @_;
+        for my $key ( @keys ) {
+          return $key if $pt->can( $key );
+        }
+        return;
+      };
+
+      my $latk = $can->( $pt, @lat );
+      my $lonk = $can->( $pt, @lon );
+      my $elek = $can->( $pt, @ele );
+
+      if ( defined $latk && defined $lonk ) {
+        return $pt->$latk(), $pt->$lonk(),
+         defined $elek ? $pt->$elek() : undef;
+      }
+    }
+    elsif ( 'ARRAY' eq ref $pt ) {
+      return $class->_location_of_pointy_thing( @$pt );
+    }
+    elsif ( 'HASH' eq ref $pt ) {
+      my $has = sub {
+        my ( $pt, @keys ) = @_;
+        for my $key ( @keys ) {
+          return $key if exists $pt->{$key};
+        }
+        return;
+      };
+
+      my $latk = $has->( $pt, @lat );
+      my $lonk = $has->( $pt, @lon );
+      my $elek = $has->( $pt, @ele );
+
+      if ( defined $latk && defined $lonk ) {
+        return $pt->{$latk}, $pt->{$lonk},
+         defined $elek ? $pt->{$elek} : undef;
+      }
+    }
+
+    croak "Don't know how to convert point";
+  }
+  else {
+    croak "Need lat, lon or lat, lon, alt"
+     if @_ < 2 || @_ > 3;
+    return my ( $lat, $lon, $alt ) = @_;
   }
 }
 

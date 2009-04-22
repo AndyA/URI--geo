@@ -2,6 +2,7 @@ Build.PL
 Changes
 lib/URI/geo.pm
 MANIFEST
+META.yml
 README
 t/00.load.t
 t/basic.t
@@ -9,4 +10,4 @@ t/construct.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
-META.yml
+t/point.t
