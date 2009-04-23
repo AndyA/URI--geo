@@ -58,13 +58,9 @@ From L<http://geouri.org/>:
   }
 }
 
-=for internal
-
-Try hard to extract location information from something. We handle lat,
-lon, alt as scalars, arrays containing lat, lon, alt, hashes with
-suitably named keys and objects with suitably named methods.
-
-=cut
+# Try hard to extract location information from something. We handle lat,
+# lon, alt as scalars, arrays containing lat, lon, alt, hashes with
+# suitably named keys and objects with suitably named methods.
 
 sub _location_of_pointy_thing {
   my $class = shift;
