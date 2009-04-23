@@ -1,8 +1,13 @@
 use strict;
 use warnings;
 use Module::Build;
+use 5.005;
 
-my $builder = Module::Build->new(
+use lib 'inc';
+
+use MyBuilder;
+
+my $builder = MyBuilder->new(
   module_name       => 'URI::geo',
   license           => 'perl',
   dist_author       => 'Andy Armstrong <andy@hexten.net>',

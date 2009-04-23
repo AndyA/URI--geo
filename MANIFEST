@@ -1,7 +1,9 @@
 Build.PL
 Changes
+inc/MyBuilder.pm
 lib/URI/geo.pm
 MANIFEST
+META.yml
 README
 t/00.load.t
 t/basic.t
@@ -11,4 +13,3 @@ t/misc.t
 t/pod-coverage.t
 t/pod.t
 t/point.t
-META.yml
