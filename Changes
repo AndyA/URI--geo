@@ -8,3 +8,7 @@ Revision history for URI-geo
         - Normalise GeoURIs at the poles.
         - Added test for Geo::Point compatibility.
 
+0.03
+        - Fix bug that meant that a call to location that updated the
+          location returned the old location rather than the new one.
+

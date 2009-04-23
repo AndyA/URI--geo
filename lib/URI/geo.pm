@@ -166,7 +166,7 @@ Create a new URI::geo. The arguments should be either
 
 =item * a reference to an array containing lat, lon, alt
 
-=item * a reference to a hash with suitably named keys
+=item * a reference to a hash with suitably named keys or
 
 =item * a reference to an object with suitably named accessors
 
@@ -182,7 +182,28 @@ accessors called C<lat>, C<latitude>, C<lon>, C<long>, C<longitude>,
 C<ele>, C<alt>, C<elevation> or C<altitude> and use them.
 
 Often if you have an object or hash reference that represents a point
-you can pass it directly to C<new>.
+you can pass it directly to C<new>; so for example this will work:
+
+  use URI::geo;
+  use Geo::Point;
+
+  my $pt = Geo::Point->latlong( 48.208333, 16.372778 );
+  my $guri = URI::geo->new( $pt );
+
+As will this:
+
+  my $guri = URI::geo->new( { lat => 55, lon => -1 } );
+
+and this:
+
+  my $guri = URI::geo->new( 55, -1 );
+
+Note that you can also create a new C<GEO::uri> by passing a GeoURI to
+C<URI::new>:
+
+  use URI;
+
+  my $guri = URI->new( 'geo:55,-1' );
 
 =cut
 
@@ -198,6 +219,7 @@ sub _init {
 
   my $self = $class->SUPER::_init( $uri, $scheme );
 
+  # Normalise at poles.
   my $lat = $self->latitude;
   $self->longitude( 0 ) if $lat == 90 || $lat == -90;
   return $self;
@@ -220,8 +242,10 @@ sub location {
 
   my ( $scheme, $auth, $path, $query, $frag ) = uri_split $$self;
 
-  $$self = uri_join 'geo', $auth, $self->_path( @_ ), $query, $frag
-   if @_;
+  if ( @_ ) {
+    $path = $self->_path( @_ );
+    $$self = uri_join 'geo', $auth, $path, $query, $frag;
+  }
 
   return $self->_parse( $path );
 }
