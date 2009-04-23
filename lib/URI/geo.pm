@@ -268,7 +268,8 @@ Get or set the longitude of this geo URI.
 
 =head2 C<altitude>
 
-Get or set the altitude of this geo URI.
+Get or set the altitude of this geo URI. To delete the altitude set it
+to C<undef>.
 
 =cut
 
