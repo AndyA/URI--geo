@@ -24,11 +24,19 @@ our $VERSION = '0.05';
 
   use URI;
 
-  # GeoURI from text
+  # GeoURI from textual uri
   my $guri = URI->new( 'geo:54.786989,-2.344214' );
 
   # From coordinates
   my $guri = URI::geo->new( 54.786989, -2.344214 );
+
+  # Decode
+  my ( $lat, $lon, $alt ) = $guri->location;
+  my $latitude = $guri->latitude;
+
+  # Update
+  $guri->location( 55, -1 );
+  $guri->longitude( -43.23 );
   
 =head1 DESCRIPTION
 
@@ -194,7 +202,7 @@ and this:
 
   my $guri = URI::geo->new( 55, -1 );
 
-Note that you can also create a new C<GEO::uri> by passing a GeoURI to
+Note that you can also create a new C<URI::geo> by passing a GeoURI to
 C<URI::new>:
 
   use URI;
