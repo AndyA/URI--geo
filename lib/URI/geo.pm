@@ -14,11 +14,11 @@ URI::geo - The geo URI scheme.
 
 =head1 VERSION
 
-This document describes URI::geo version 0.05
+This document describes URI::geo version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 SYNOPSIS
 
