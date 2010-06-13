@@ -55,17 +55,6 @@ From L<http://geouri.org/>:
 
 =cut
 
-{
-  my $num = qr{-?\d{1,3}(?:\.\d+)?};
-
-  sub _parse {
-    my ( $class, $path ) = @_;
-    croak "Badly formed geo uri"
-     unless $path =~ /^$num(?:,$num){1,2}$/;
-    return my ( $lat, $lon, $alt ) = split /,/, $path;
-  }
-}
-
 # Try hard to extract location information from something. We handle lat,
 # lon, alt as scalars, arrays containing lat, lon, alt, hashes with
 # suitably named keys and objects with suitably named methods.
@@ -137,25 +126,9 @@ sub _location_of_pointy_thing {
 
 sub _num {
   my ( $class, $n ) = @_;
+  return '' unless defined $n;
   ( my $rep = sprintf '%f', $n ) =~ s/\.0*$//;
   return $rep;
-}
-
-sub _format {
-  my ( $class, $lat, $lon, $alt ) = @_;
-  croak "Missing or undefined latitude"  unless defined $lat;
-  croak "Missing or undefined longitude" unless defined $lon;
-  return join ',', map { $class->_num( $_ ) }
-   grep { defined } $lat, $lon, $alt;
-}
-
-sub _path {
-  my $class = shift;
-  my ( $lat, $lon, $alt ) = $class->_location_of_pointy_thing( @_ );
-  croak "Latitude out of range"  if $lat < -90  || $lat > 90;
-  croak "Longitude out of range" if $lon < -180 || $lon > 180;
-  $lon = 0 if $lat == -90 || $lon == 90;
-  return $class->_format( $lat, $lon, $alt );
 }
 
 =head1 INTERFACE 
@@ -244,26 +217,12 @@ types that can be passed to C<new>.
 sub location {
   my $self = shift;
 
-  my ( $scheme, $auth, $path, $query, $frag ) = uri_split $$self;
-
   if ( @_ ) {
-    $path = $self->_path( @_ );
-    $$self = uri_join 'geo', $auth, $path, $query, $frag;
+    my ( $lat, $lon, $alt ) = @_;
+    return $self->latitude( $lat )->longitude( $lon )->altitude( $alt );
   }
 
-  return $self->_parse( $path );
-}
-
-sub _patch {
-  my $self = shift;
-  my $idx  = shift;
-
-  my @part = $self->location;
-  if ( @_ ) {
-    $part[$idx] = shift;
-    $self->location( @part );
-  }
-  return $part[$idx];
+  return $self->latitude, $self->longitude, $self->altitude;
 }
 
 =head2 C<latitude>
@@ -279,11 +238,90 @@ Get or set the longitude of this geo URI.
 Get or set the altitude of this geo URI. To delete the altitude set it
 to C<undef>.
 
+=head2 C<crs>
+
+=head2 C<uncertainty>
+
+=head2 C<field>
+
 =cut
 
-sub latitude  { shift->_patch( 0, @_ ) }
-sub longitude { shift->_patch( 1, @_ ) }
-sub altitude  { shift->_patch( 2, @_ ) }
+BEGIN {
+  my @m = qw( latitude longitude altitude crs uncertainty );
+  for my $meth ( @m ) {
+    no strict 'refs';
+    *{$meth} = sub { shift->field( $meth, @_ ) };
+  }
+}
+
+sub field {
+  my ( $self, $name ) = ( shift, shift );
+  my ( $scheme, $auth, $v, $query, $frag ) = $self->_parse;
+
+  croak "No such field: $name" unless exists $v->{$name};
+  return $v->{$name} unless @_;
+  $v->{$name} = shift;
+  $$self = uri_join $scheme, $auth, $self->_format( $v ), $query, $frag;
+  return $self;
+}
+
+{
+  my $pnum = qr{\d+(?:\.\d+)?};
+  my $num  = qr{-?$pnum};
+  my $crsp = qr{(?:;crs=(\w+))};
+  my $uncp = qr{(?:;u=($pnum))};
+  my $parm = qr{(?:;\w+=[^;]*)+};
+
+  sub _parse {
+    my $self = shift;
+    my ( $scheme, $auth, $path, $query, $frag ) = uri_split $$self;
+
+    $path =~ m{^ ($num), ($num) (?: , ($num) ) ?
+                   (?: $crsp ) ?
+                   (?: $uncp ) ?
+                   ( $parm ) ? 
+                $}x or croak "Badly formed geo uri";
+
+    # No named captures before 5.10.0
+    return $scheme, $auth,
+     {
+      latitude    => $1,
+      longitude   => $2,
+      altitude    => $3,
+      crs         => $4,
+      uncertainty => $5,
+      parameters  => ( defined $6 ? substr $6, 1 : undef ),
+     },
+     $query, $frag;
+  }
+}
+
+sub _format {
+  my ( $class, $v ) = @_;
+  return join ';',
+   (
+    join ',',
+    map { $class->_num( $_ ) } @{$v}{ 'latitude', 'longitude' },
+    ( defined $v->{altitude} ? ( $v->{altitude} ) : () )
+   ),
+   ( defined $v->{crs} ? ( 'crs=' . $class->_num( $v->{crs} ) ) : () ),
+   (
+    defined $v->{uncertainty}
+    ? ( 'u=' . $class->_num( $v->{uncertainty} ) )
+    : ()
+   ),
+   ( defined $v->{parameters} ? ( $v->{parameters} ) : () );
+}
+
+sub _path {
+  my $class = shift;
+  my ( $lat, $lon, $alt ) = $class->_location_of_pointy_thing( @_ );
+  croak "Latitude out of range"  if $lat < -90  || $lat > 90;
+  croak "Longitude out of range" if $lon < -180 || $lon > 180;
+  $lon = 0 if $lat == -90 || $lon == 90;
+  return $class->_format(
+    { latitude => $lat, longitude => $lon, altitude => $alt } );
+}
 
 1;
 
