@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use URI;
-use Test::More tests => 17;
+use Test::More tests => 21;
 
 {
   ok my $guri = URI->new( 'geo:54.786989,-2.344214' ), 'created';
@@ -34,6 +34,15 @@ use Test::More tests => 17;
   ok my $guri = URI->new( 'geo:-33,30' ), 'created';
   my @loc = $guri->location;
   is_deeply [@loc], [ -33, 30, undef ], 'got location';
+}
+
+{
+  ok my $guri = URI->new( 'geo:-33,30,12.3;crs=wgs84;u=12' ), 'created';
+  my @loc = $guri->location;
+  is_deeply [@loc], [ -33, 30, 12.3 ], 'got location';
+  is $guri->crs,         'wgs84', 'crs';
+  is $guri->uncertainty, 12,      'u';
+
 }
 
 {
