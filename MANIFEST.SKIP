@@ -32,3 +32,4 @@
 # Misc other stuff
 ^reference/
 
+^MYMETA.yml$
