@@ -4,6 +4,7 @@
 .prove
 Build
 META.yml
+MYMETA.yml
 Makefile
 Makefile.old
 Session.vim
